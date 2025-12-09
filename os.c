@@ -58,6 +58,24 @@ void inputData(int *n, int *r, int ***allocation, int ***request, int **availabl
         scanf("%d", &(*available)[j]);
     }
 }
+/*
+---------------------------------------------------------------------------
+Deadlock Detection Algorithm (C Implementation)
+// 
+The algorithm follows these steps:
+1. Copy the Available[] array into a temporary Work[] array.
+2. Initialize all processes as unfinished (finish[i] = false).
+3. Search for a process whose outstanding Request[i][j] <= Work[j] for all j.
+4. If found, simulate completion: add its Allocation back to Work and mark it finished.
+5. Repeat until no more processes can be marked finished.
+6. Any process that remains unfinished is part of the deadlock set.
+
+Returns: number of deadlocked processes.
+Fills the deadlocked[] array with process IDs of deadlocked processes.
+---------------------------------------------------------------------------
+
+*/
+
 
 // ---------- Deadlock Detection Module ----------
 // Returns the number of deadlocked processes.
@@ -65,21 +83,22 @@ void inputData(int *n, int *r, int ***allocation, int ***request, int **availabl
 int detectDeadlock(int n, int r, int **allocation, int **request,
      int *available, int *deadlocked)
 {
+      // Step 1: Create Work[] = Available[]
     int *work = (int *)malloc(r * sizeof(int));
     for (int i = 0; i < r; i++)
         work[i] = available[i];
-
+// Step 2: Create Finish[] and initialize to false (0)
     bool *finish = (bool *)malloc(n * sizeof(bool));
     for (int i = 0; i < n; i++)
         finish[i] = false;
-
+ // Step 3 & 4: Try to find a process that can finish
     bool progress;
     do
     {
         progress = false;
         for (int i = 0; i < n; i++)
         {
-            if (!finish[i])
+            if (!finish[i])// Process not finished yet
             {
                 bool canFinish = true;
                 for (int j = 0; j < r; j++)
@@ -90,6 +109,7 @@ int detectDeadlock(int n, int r, int **allocation, int **request,
                         break;
                     }
                 }
+                // If process can finish, release its resources to Work
                 if (canFinish)
                 {
                     for (int j = 0; j < r; j++)
@@ -99,8 +119,9 @@ int detectDeadlock(int n, int r, int **allocation, int **request,
                 }
             }
         }
-    } while (progress);
+    } while (progress);// Repeat until no more processes can finish
 
+// Step 5: Collect processes that are still unfinished (deadlocked)
     int count = 0;
     for (int i = 0; i < n; i++)
     {
@@ -110,10 +131,19 @@ int detectDeadlock(int n, int r, int **allocation, int **request,
         }
     }
 
+ // Free temporary memory
     free(work);
     free(finish);
-    return count;
+    return count; // Return number of deadlocked processes
 }
+
+// ---------------------------------------------------------------------------
+// Recovery Algorithm
+// When a process is aborted:
+// - All its allocated resources are returned to Available[]
+// - Its allocation row becomes 0
+// - Its request row becomes 0 (process no longer needs anything)
+// ---------------------------------------------------------------------------
 
 // ---------- Recovery Module ----------
 void applyRecovery(int pid, int r, int **allocation, int **request, int *available)
@@ -121,9 +151,10 @@ void applyRecovery(int pid, int r, int **allocation, int **request, int *availab
     // Release allocated resources
     for (int j = 0; j < r; j++)
     {
-        available[j] += allocation[pid][j];
-        allocation[pid][j] = 0;
-        request[pid][j] = 0;
+        available[j] += allocation[pid][j];// Return allocated resources
+        allocation[pid][j] = 0;// Clear allocation
+        request[pid][j] = 0;// Clear pending requests
+        
     }
 }
 
