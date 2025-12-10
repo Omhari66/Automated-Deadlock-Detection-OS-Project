@@ -1,0 +1,20 @@
+# Recovery Test Case (Deadlock gets resolved after abort)
+
+Number of processes: 3
+Number of resources: 3
+
+Allocation Matrix:
+0 1 0
+2 0 0
+3 0 3
+
+Request Matrix:
+0 0 1
+1 0 0
+0 2 0
+
+Available Resources:
+1 0 2
+
+Expected Deadlocked Process: P2
+After recovery: abort P2 -> system becomes safe.
