@@ -146,17 +146,28 @@ int detectDeadlock(int n, int r, int **allocation, int **request,
 // ---------------------------------------------------------------------------
 
 // ---------- Recovery Module ----------
+// ---------------------------------------------------------------------------
+// applyRecovery()
+// This function simulates aborting a process during deadlock recovery.
+// Steps:
+// 1. The process is "terminated" (simulated).
+// 2. All resources allocated to that process are released back to 'available'.
+// 3. Allocation and Request entries for that process are cleared to 0.
+// ---------------------------------------------------------------------------
 void applyRecovery(int pid, int r, int **allocation, int **request, int *available)
 {
-    // Release allocated resources
+    printf("\n[Recovery] Aborting Process P%d...\n", pid);
+
     for (int j = 0; j < r; j++)
     {
-        available[j] += allocation[pid][j];// Return allocated resources
-        allocation[pid][j] = 0;// Clear allocation
-        request[pid][j] = 0;// Clear pending requests
-        
+        available[j] += allocation[pid][j];  // Release allocated resources
+        allocation[pid][j] = 0;              // Clear allocation
+        request[pid][j] = 0;                 // Clear pending request
     }
+
+    printf("[Recovery] Process P%d aborted. Resources released.\n", pid);
 }
+
 
 // ---------- System Display ----------
 void printSystem(int n, int r, int **allocation, int **request, int *available)
