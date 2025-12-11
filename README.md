@@ -54,3 +54,20 @@ The project is organized as follows:
 ```bash
 gcc os.c -o os
 ./os
+
+---
+
+## 📸 Screenshots (Program Output)
+
+Below are sample outputs showing the system behavior:
+
+### **1. Safe State Example**
+![Safe State](screenshots/test1.png)
+
+### **2. Deadlock Detected**
+![Deadlock](screenshots/test2.png)
+
+### **3. Recovery by Aborting a Process**
+![Recovery](screenshots/test3.png)
+
+Screenshots are stored in the `screenshots/` folder.
