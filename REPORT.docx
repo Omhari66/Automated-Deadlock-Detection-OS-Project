@@ -1,0 +1,196 @@
+Project Title: Automated Deadlock Detection Tool
+Course: CSE316 – Operating Systems
+Student Roll No.: 16
+1. Project Overview
+A deadlock occurs when two or more processes wait indefinitely for resources held by one another, causing the system to freeze. Detecting such deadlocks is an essential task of an operating system.
+The Automated Deadlock Detection Tool is a simulation-based project that demonstrates how an OS detects and resolves deadlocks using the Deadlock Detection Algorithm. The tool accepts user input for:
+•	Number of processes
+•	Number of resource types
+•	Allocation Matrix
+•	Request Matrix
+•	Available Resources
+The program then analyzes whether the system is in a safe state or a deadlock state. If deadlock is detected, the tool allows the user to perform real recovery by selecting a process to abort, releasing its resources back to the system, and re-running detection to verify recovery.
+Key Outcomes
+•	Identify deadlocked processes automatically
+•	Implement real deadlock recovery
+•	Analyze system safety using OS algorithms
+•	Learn resource allocation & process synchronization concepts
+________________________________________
+2. Module-Wise Breakdown
+Module 1: Input & Modeling Module
+•	Takes user input for processes and resources
+•	Reads Allocation Matrix
+•	Reads Request Matrix
+•	Reads Available Resources
+•	Stores matrices dynamically using vectors
+Module 2: Deadlock Detection Engine
+•	Implements Deadlock Detection Algorithm
+•	Compares each process’s request with available resources
+•	Marks processes as finished if they can complete
+•	Detects processes that remain unfinished (deadlocked)
+•	Returns a list of deadlocked processes
+Module 3: Recovery & Reporting Module
+•	Allows user to select a process to abort
+•	Recovery releases allocated resources back to available
+•	Re-runs detection to confirm if system becomes safe
+•	Displays post-recovery deadlock status
+________________________________________
+3. Functionalities
+Module 1 Functionalities
+•	Accept number of processes
+•	Accept number of resource types
+•	Input Allocation & Request matrices
+•	Input Available resources
+•	Validate user input
+Module 2 Functionalities
+•	Check process requests
+•	Grant resources if request ≤ available
+•	Mark finished processes
+•	Identify unsafe state
+•	Output deadlocked process list
+Module 3 Functionalities
+•	Ask user to select a process to abort
+•	Perform real recovery: free resources of aborted process
+•	Recheck for remaining deadlock
+•	Print final system status
+________________________________________
+4. Technology Used
+Programming Language
+C (procedural programming language)
+Libraries and Tools
+•	<stdio.h> – input/output
+•	<pointer> – dynamic matrix allocation
+Other Tools
+•	GitHub for version control
+•	PowerShell/CMD for compilation and execution
+•	Draw.io for flow diagram creation
+•	MS Word for documentation
+
+5. Flow Diagram
+
+6. Algorithm / Methodology
+The Automated Deadlock Detection Tool uses the Deadlock Detection Algorithm based on resource allocation matrices.
+The methodology consists of the following steps:
+Step 1 — Define Matrices
+1.	Allocation Matrix (n × r)
+o	allocation[i][j] = resources of type j currently held by process i.
+2.	Request Matrix (n × r)
+o	request[i][j] = additional resources process i needs to complete.
+3.	Available Vector (1 × r)
+o	available[j] = number of free instances of resource type j.
+Step 2 — Initialize Work and Finish
+4.	Copy available into a temporary vector work.
+5.	Initialize finish[i] = false for all processes.
+Step 3 — Safe Completion Check
+6.	A process i can finish if:
+request[i][j] <= work[j]  (∀ j)
+7.	 If a process can finish, the system simulates its completion:
+o	work[j] += allocation[i][j] (resources released)
+o	finish[i] = true
+Step 4  — Repeat Until No Progress
+8.	Continue scanning processes until no further process can finish.
+Step 5 — Identify Deadlocked Processes
+9.	Any process with finish[i] == false is deadlocked.
+Step 6 — Recovery Method
+10.	The tool allows the user to abort one process, releasing its allocated resources:
+  	available[j] += allocation[pid][j]
+ 	allocation[pid][j] = 0
+request[pid][j] = 0
+11.	The detection algorithm is executed again to check if the system is now deadlock-free.
+This step-by-step methodology provides a clear simulation of how operating systems detect and recover from deadlocks.
+
+7. GitHub Revision Tracking
+Repository Name:
+Automated-Deadlock-Detection-OS-Project
+Suggested Commit Log
+1.	Initial commit – project structure
+2.	Added input module
+3.	Added detection engine structure
+4.	Completed deadlock algorithm
+5.	Added recovery module
+6.	Final testing + bug fixes
+7.	Documentation uploaded
+Repository Name: Automated-Deadlock-Detection-OS-Project
+GitHub Link: https://github.com/Omhari66/Automated-Deadlock-Detection-OS-Project
+8. Conclusion & Future Scope
+Conclusion
+This project successfully simulates OS-level deadlock detection and recovery. The system analyzes resource allocation using the Deadlock Detection Algorithm, identifies processes involved in deadlock, and performs real recovery by aborting selected processes, thereby releasing resources and re-evaluating system state.
+This helps in understanding:
+•	Resource allocation
+•	Process synchronization
+•	Deadlock handling
+•	System safety
+Future Scope
+•	Add real graphical UI using Qt
+•	Integrate MERN-based web interface
+•	Add Resource Allocation Graph visualization
+•	Predict deadlocks using ML models
+•	Add file input/output for large datasets
+
+APPENDIX
+Appendix A: AI-Generated Breakdown
+The AI system helped in the initial project design by providing:
+•	A clear explanation of the problem statement: detecting deadlocks using OS algorithms.
+•	A module-wise breakdown into Input Module, Detection Module, and Recovery Module.
+•	A step-by-step execution plan for building the C program.
+•	Suggestions for test cases, flow diagrams, and documentation structure.
+•	Guidance for enhancing the project with recovery features and modularity.
+This planning helped structure the project before starting implementation.
+________________________________________
+Appendix B: Problem Statement
+Project 16 – Automated Deadlock Detection Tool
+Design a tool that automatically detects potential deadlocks in system processes. It should analyze process dependencies and resource allocation to identify circular wait conditions and suggest resolution strategies.
+________________________________________Appendix C: Final C Code
+Below is a short excerpt of the main program structure for clarity:
+ 
+
+Below is the complete C implementation of the Automated Deadlock Detection Tool.
+The program is divided into three modules:
+1.	Input Module – Reads matrices and validates input
+2.	Deadlock Detection Module – Implements OS deadlock detection algorithmRecovery Module – Simulates killing a process and freeing resources
+    
+
+
+— Experimental Results
+To verify the correctness of the Automated Deadlock Detection Tool, multiple test cases were executed.
+Screenshots (attached separately) demonstrate the functioning of deadlock detection and recovery.
+Test Case 1 — Safe State
+Input:
+•	Processes: 3
+•	Resources: 3
+•	No process requests exceed available resources.
+Output:
+SAFE STATE — No Deadlock Detected.
+Explanation:
+All processes can finish in sequence because their requests are satisfied by available resources.
+Test Case 2 — Deadlock Detected (Single Process)
+Input:
+A system where P2 is waiting for a resource that cannot be granted.
+Output:
+DEADLOCK DETECTED!
+Deadlocked Processes: P2
+Explanation:
+After checking all processes, P2 remains unfinished, indicating a circular wait.
+
+Test Case 3 — Recovery by Aborting Process
+Recovery Input:
+Enter process ID to abort: 2
+Output:
+Process P2 aborted. Resources released.
+SYSTEM RECOVERED — No Deadlock Now.
+Explanation:
+Releasing P2’s allocated resources allows remaining processes to finish safely.
+Test Case 4 — Multiple Deadlocked Processes
+Input:
+Two or more processes form a cycle.
+Output:
+DEADLOCK DETECTED!
+Deadlocked Processes: P1 P3
+Explanation:
+The system correctly identifies all unfinished processes.
+8. References
+•	Abraham Silberschatz – Operating System Concepts
+•	Galvin & Gagne – Deadlock Handling
+•	GeeksforGeeks – Deadlock Algorithm
+•	NPTEL – OS Lecture Series
+

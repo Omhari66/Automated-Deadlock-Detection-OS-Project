@@ -71,3 +71,9 @@ Below are sample outputs showing the system behavior:
 ![Recovery](screenshots/test3.png)
 
 Screenshots are stored in the `screenshots/` folder.
+---
+
+## 🔗 GitHub Repository Link
+This project is available on GitHub at:
+
+https://github.com/Omhari66/Automated-Deadlock-Detection-OS-Project
