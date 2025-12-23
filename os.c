@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+/* ---------- Clear Input Buffer ---------- */
+void clearInputBuffer()
+{
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF);
+}
 
 // ---------- Helper: Allocate 2D Matrix ----------
 int **allocateMatrix(int rows, int cols)
@@ -14,50 +20,64 @@ int **allocateMatrix(int rows, int cols)
 }
 
 // ---------- Input Module ----------
-void inputData(int *n, int *r, int ***allocation, int ***request, int **available)
+bool inputData(int *n, int *r, int ***allocation, int ***request, int **available)
 {
     printf("Enter number of processes: ");
-    scanf("%d", n);
-    if (*n <= 0)
+    if (scanf("%d", n) != 1 || *n <= 0)
     {
-        printf("Invalid input");
-        exit(0);
+        printf("ERROR: Number of processes must be positive.\n");
+          clearInputBuffer();
+        return false;
     }
 
     printf("Enter number of resource types: ");
-    scanf("%d", r);
+    if (scanf("%d", r) != 1 || *r <= 0)
+    {
+        printf("ERROR: Number of resource types must be positive.\n");
+          clearInputBuffer();
+        return false;
+    }
 
-    // Allocate memory
     *allocation = allocateMatrix(*n, *r);
     *request = allocateMatrix(*n, *r);
     *available = (int *)malloc(*r * sizeof(int));
 
     printf("\nEnter Allocation Matrix:\n");
-    for (int i = 0; i < *n; i++)
-    {
-        printf("P%d: ", i);
-        for (int j = 0; j < *r; j++)
-        {
-            scanf("%d", &(*allocation)[i][j]);
+    for (int i = 0; i < *n; i++){
+        printf("P%d: ",i);
+        for (int j = 0; j < *r; j++){
+           if(scanf("%d", &(*allocation)[i][j])!=1)
+           {
+            printf("Invalid input in Allocation Matrix\n");
+                clearInputBuffer();
+                return false;
+           }
         }
     }
-
     printf("\nEnter Request Matrix:\n");
-    for (int i = 0; i < *n; i++)
-    {
-        printf("P%d: ", i);
-        for (int j = 0; j < *r; j++)
-        {
-            scanf("%d", &(*request)[i][j]);
+    for (int i = 0; i < *n; i++){
+    printf("P%d: ",i);
+        for (int j = 0; j < *r; j++){
+            if(scanf("%d", &(*request)[i][j])!=1){
+                 printf("Invalid input in Request Matrix\n");
+                clearInputBuffer();
+                return false;
+            }
         }
     }
 
-    printf("\nEnter Available Resources: ");
+    printf("\nEnter Available Resources:\n");
     for (int j = 0; j < *r; j++)
-    {
-        scanf("%d", &(*available)[j]);
-    }
+       if(scanf("%d", &(*available)[j])!=1){
+         printf("Invalid input in Request Matrix\n");
+                clearInputBuffer();
+                return false;
+       }
+    
+
+    return true;
 }
+
 /*
 ---------------------------------------------------------------------------
 Deadlock Detection Algorithm (C Implementation)
@@ -199,116 +219,136 @@ void printSystem(int n, int r, int **allocation, int **request, int *available)
 // ---------- MAIN ----------
 int main()
 {
-    printf("============================================\n");
-    printf("       AUTOMATED DEADLOCK DETECTION TOOL    \n");
-    printf("============================================\n\n");
+    int runAgain = 1;
 
-    int n, r;
-    int **allocation = NULL;
-    int **request = NULL;
-    int *available = NULL;
-
-    // Step 1: Input
-    inputData(&n, &r, &allocation, &request, &available);
-
-    // Step 2: Display system
-    printSystem(n, r, allocation, request, available);
-
-    // Step 3: Detect deadlock
-    int *deadlocked = (int *)malloc(n * sizeof(int));
-    int deadlockedCount = detectDeadlock(n, r, allocation, request, available, 
-        deadlocked);
-
-    printf("\n============================================\n");
-    printf("                 RESULTS                    \n");
-    printf("============================================\n\n");
-
-    if (deadlockedCount == 0)
+    while (runAgain)
     {
-        printf("SAFE STATE - No Deadlock Detected.\n");
-        // Cleanup and exit
-        free(deadlocked);
-        return 0;
-    }
+        printf("============================================\n");
+        printf("       AUTOMATED DEADLOCK DETECTION TOOL    \n");
+        printf("============================================\n\n");
 
-    printf("DEADLOCK DETECTED!\n");
-    printf("Deadlocked Processes: ");
-    for (int i = 0; i < deadlockedCount; i++)
-    {
-        printf("P%d ", deadlocked[i]);
-    }
-    printf("\n");
+        int n, r;
+        int **allocation = NULL;
+        int **request = NULL;
+        int *available = NULL;
 
-    // Step 4: Recovery
-    while (1)
-    {
-        printf("\nRecovery Options:\n");
-        printf("1. Abort a process\n");
-        printf("2. Show system state\n");
-        printf("3. Exit\n");
-        printf("Enter choice: ");
-
-        int choice;
-        scanf("%d", &choice);
-
-        if (choice == 3)
+        /* Step 1: Input */
+        if (!inputData(&n, &r, &allocation, &request, &available))
         {
-            printf("Exiting without recovery.\n");
-            break;
-        }
-        else if (choice == 2)
-        {
-            printSystem(n, r, allocation, request, available);
+            printf("\nInput Error. Restarting...\n\n");
             continue;
         }
-        else if (choice == 1)
+
+        /* Step 2: Display system */
+        printSystem(n, r, allocation, request, available);
+
+        /* Step 3: Detect deadlock */
+        int *deadlocked = (int *)malloc(n * sizeof(int));
+        int deadlockedCount = detectDeadlock(
+            n, r, allocation, request, available, deadlocked);
+
+        printf("\n============================================\n");
+        printf("                 RESULTS                    \n");
+        printf("============================================\n\n");
+
+        if (deadlockedCount == 0)
         {
-            int pid;
-            printf("Enter process ID to abort: ");
-            scanf("%d", &pid);
+            printf("SAFE STATE - No Deadlock Detected.\n");
+        }
+        else
+        {
+            printf("DEADLOCK DETECTED!\n");
+            printf("Deadlocked Processes: ");
+            for (int i = 0; i < deadlockedCount; i++)
+                printf("P%d ", deadlocked[i]);
+            printf("\n");
 
-            if (pid < 0 || pid >= n)
+            /* Step 4: Recovery (OLD DESIGN PRESERVED) */
+            while (1)
             {
-                printf("Invalid PID.\n");
-                continue;
-            }
+                printf("\nRecovery Options:\n");
+                printf("1. Abort a process\n");
+                printf("2. Show system state\n");
+                printf("3. Exit recovery\n");
+                printf("Enter choice: ");
 
-            applyRecovery(pid, r, allocation, request, available);
-            printf("Process P%d aborted. Resources released.\n", pid);
-
-            deadlockedCount = detectDeadlock(n, r, allocation, request, available, deadlocked);
-
-            if (deadlockedCount == 0)
-            {
-                printf("\nSYSTEM RECOVERED - No Deadlock Now.\n");
-                break;
-            }
-            else
-            {
-                printf("\nStill Deadlocked. Remaining: ");
-                for (int i = 0; i < deadlockedCount; i++)
-                {
-                    printf("P%d ", deadlocked[i]);
+                int choice;
+                if(scanf("%d", &choice)!=1){
+                    printf("Invalid input in Request Matrix\n");
+                    clearInputBuffer();
+                    return false;
                 }
-                printf("\n");
+
+                if (choice == 3)
+                {
+                    printf("Exiting recovery.\n");
+                    break;
+                }
+                else if (choice == 2)
+                {
+                    printSystem(n, r, allocation, request, available);
+                }
+                else if (choice == 1)
+                {
+                    int pid;
+                    printf("Enter process ID to abort: ");
+                    if(scanf("%d", &pid)!=1){
+                         printf("Invalid input in Request Matrix\n");
+                        clearInputBuffer();
+                        return false;
+                    }
+
+                    if (pid < 0 || pid >= n)
+                    {
+                        printf("Invalid PID.\n");
+                        continue;
+                    }
+
+                    applyRecovery(pid, r, allocation, request, available);
+
+                    deadlockedCount = detectDeadlock(
+                        n, r, allocation, request, available, deadlocked);
+
+                    if (deadlockedCount == 0)
+                    {
+                        printf("\nSYSTEM RECOVERED - No Deadlock Now.\n");
+                        break;
+                    }
+                    else
+                    {
+                        printf("\nStill Deadlocked. Remaining: ");
+                        for (int i = 0; i < deadlockedCount; i++)
+                            printf("P%d ", deadlocked[i]);
+                        printf("\n");
+                    }
+                }
+                else
+                {
+                    printf("Invalid choice.\n");
+                }
             }
         }
+
+        printf("\n============================================\n");
+        printf("                   END                      \n");
+        printf("============================================\n");
+
+        /* Cleanup */
+        free(deadlocked);
+        free(available);
+        for (int i = 0; i < n; i++)
+        {
+            free(allocation[i]);
+            free(request[i]);
+        }
+        free(allocation);
+        free(request);
+
+        printf("\nDo you want to run the tool again? (1 = Yes, 0 = No): ");
+        scanf("%d", &runAgain);
+        printf("\n");
     }
 
-    printf("\n============================================\n");
-    printf("                   END                      \n");
-    printf("============================================\n");
-
-    // Free memory (optional but good practice)
-    free(deadlocked);
-    free(available);
-    for (int i = 0; i < n; i++)
-    {
-        free(allocation[i]);
-        free(request[i]);
-    }
-    free(allocation);
-    free(request);
-
+    printf("Program terminated successfully.\n");
     return 0;
 }
